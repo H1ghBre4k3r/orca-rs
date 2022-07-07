@@ -1,6 +1,6 @@
 [package]
 name = "orca-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Louis Meyer (H1ghBre4kr) <h1ghbre4k3r@dev.bre4k3r.de>"]
 description = "Implementation of the ORCA algorithm."
@@ -10,7 +10,7 @@ license = "MIT"
 ndarray = "0.14"
 
 [lib]
-name = "liborca"
+name = "orca_rs"
 
 [features]
 default = ["participant_obstacles"]
