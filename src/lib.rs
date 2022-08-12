@@ -53,11 +53,11 @@ pub fn orca(
     if norm(&vel) > we.vmax {
         vel = normalize(&vel) * we.vmax;
     }
-    return vel;
+    vel
 }
 
 fn is_static(p: &Participant) -> bool {
-    return norm(&p.velocity) <= EPSILON;
+    norm(&p.velocity) <= EPSILON
 }
 
 /// Generate the halfplanes for other participants and static obstacles.
@@ -72,7 +72,7 @@ fn generate_halfplanes(
     let mut obstacle_planes = Vec::new();
     let mut halfplanes = Vec::new();
     // some cloning, since rust does not like multiple mutable borrows
-    let parts = participants.to_vec().clone();
+    let parts = participants.to_vec();
     for (i, p) in parts.iter().enumerate() {
         let mut in_obstacle = false;
         if PART_OBSTACLES && is_static(p) {
@@ -124,5 +124,5 @@ fn generate_halfplanes(
         obstacle_planes.push(Halfplane { u, n });
     }
 
-    return (halfplanes, obstacle_planes);
+    (halfplanes, obstacle_planes)
 }
