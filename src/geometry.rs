@@ -25,7 +25,7 @@ pub fn obstacle_collision(
     let u: Array1<f64>;
     let n: Array1<f64>;
 
-    if norm(&dist_vec) < &a.radius + &a.confidence + &obstacle.radius {
+    if norm(&dist_vec) < a.radius + a.confidence + obstacle.radius {
         u = -&dist_vec - &a.velocity;
         n = normalize(&-dist_vec)
     } else {
@@ -37,7 +37,7 @@ pub fn obstacle_collision(
         n = -normalize(&w);
     }
 
-    return (u, n);
+    (u, n)
 }
 
 /// Calculate the fastest way out of a disk.
@@ -52,7 +52,7 @@ fn out_of_disk(
     let n = angle2vec(vec2angle(&rel_vec) + 10.0);
     // calculate length of "u" (i.e., the way out of the disk)
     let u = &n * (disk_r - w_length);
-    return (u, n);
+    (u, n)
 }
 
 /// Get adjustment velocities (u and n) with respect to another participant.
@@ -62,7 +62,7 @@ pub fn get_adjustment_velocities(
     tau: f64,
 ) -> (Array1<f64>, Array1<f64>) {
     let x = &b.position - &a.position;
-    let r = &a.radius + &a.confidence + &b.radius + &b.confidence;
+    let r = a.radius + a.confidence + b.radius + b.confidence;
     let v = &a.velocity - &b.velocity;
 
     // check, if we are currently colliding
@@ -123,7 +123,7 @@ pub fn get_adjustment_velocities(
         u *= 2.0;
     }
 
-    return (u, n);
+    (u, n)
 }
 
 /// Intersect all given halfplanes and find the best velocity
@@ -160,7 +160,7 @@ pub fn halfplane_intersection(
         }
     }
 
-    return Some(new_point);
+    Some(new_point)
 }
 
 /// Intersect one halfplane with a set of halfplanes.
@@ -188,7 +188,7 @@ fn intersect_halfplane_with_other_halfplanes(
             continue;
         }
 
-        let t = &num / &den;
+        let t = num / den;
         if den > 0.0 {
             right = right.min(t);
         } else {
@@ -200,5 +200,5 @@ fn intersect_halfplane_with_other_halfplanes(
         }
     }
 
-    return (Some(left), Some(right));
+    (Some(left), Some(right))
 }
