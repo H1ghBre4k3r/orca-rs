@@ -4,6 +4,8 @@ mod math;
 pub mod obstacle;
 pub mod participant;
 
+pub use ndarray;
+
 use geometry::{get_adjustment_velocities, halfplane_intersection, obstacle_collision};
 use halfplane::Halfplane;
 use math::{dist, max, norm, normalize};
