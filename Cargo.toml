@@ -1,6 +1,6 @@
 [package]
 name = "orca-rs"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Louis Meyer (H1ghBre4kr) <h1ghbre4k3r@dev.bre4k3r.de>"]
 description = "Implementation of the ORCA algorithm."
