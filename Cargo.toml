@@ -1,6 +1,6 @@
 [package]
 name = "orca-rs"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
 authors = ["Louis Meyer (H1ghBre4kr) <h1ghbre4k3r@dev.bre4k3r.de>"]
 description = "Implementation of the ORCA algorithm."
@@ -8,6 +8,7 @@ license = "MIT"
 repository = "https://github.com/H1ghBre4k3r/orca-rs"
 
 [dependencies]
+log = "0.4.17"
 ndarray = "0.15.4"
 
 [lib]
