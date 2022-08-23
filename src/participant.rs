@@ -31,6 +31,18 @@ pub struct Participant {
 }
 
 impl Participant {
+    pub fn new(position: Array1<f64>, velocity: Array1<f64>, radius: f64, confidence: f64) -> Self {
+        Self {
+            position,
+            velocity,
+            radius,
+            confidence,
+            vmax: None,
+            target: None,
+            in_obstacle: false,
+        }
+    }
+
     pub fn with_inner_state(mut self, vmax: f64, target: Array1<f64>) -> Self {
         debug!("Participant::with_inner_state({}, {})", vmax, target);
         self.vmax = Some(vmax);
