@@ -1,3 +1,4 @@
+use log::{debug, warn};
 use ndarray::{arr1, Array1};
 
 use crate::{
@@ -31,30 +32,44 @@ pub struct Participant {
 
 impl Participant {
     pub fn with_inner_state(mut self, vmax: f64, target: Array1<f64>) -> Self {
+        debug!("Participant::with_inner_state({}, {})", vmax, target);
         self.vmax = Some(vmax);
+        debug!("self.vmax = {:?}", self.vmax);
         self.target = Some(target);
+        debug!("self.target = {:?}", self.target);
         self
     }
 
     pub fn update_position(&mut self, position: &Array1<f64>) {
+        debug!("Participant::update_position({})", position);
         self.position = position.clone();
+        debug!("self.position = {:?}", self.position);
 
         if let Some(target) = self.target.clone() {
             self.velocity = target - &self.position;
+            debug!("self.velocity = {:?}", self.velocity);
+        } else {
+            warn!("Updating the position of a participant without a target. Consider assigning property directly!")
         }
 
         if let Some(vmax) = self.vmax {
             if math::norm(&self.velocity) > vmax {
-                self.velocity = math::normalize(&self.velocity) * vmax
+                self.velocity = math::normalize(&self.velocity) * vmax;
+                debug!("self.velocity = {:?}", self.velocity);
             }
+        } else {
+            warn!("Updating the position of a participant without a maximum velocity. Consider assigning property directly!")
         }
     }
 
     pub fn in_obstacle(&mut self) {
+        debug!("Participant::in_obstacle()");
         self.in_obstacle = true;
+        debug!("self.in_obstacle = {}", self.in_obstacle);
     }
 
     pub fn is_static(&self) -> bool {
+        debug!("Participant::is_static()");
         norm(&self.velocity) <= EPSILON
     }
 
@@ -67,6 +82,7 @@ impl Participant {
         obstacles: &[Obstacle],
         tau: f64,
     ) -> Array1<f64> {
+        debug!("Participant::orca({:?}, {:?}, {})", others, obstacles, tau);
         let (mut halfplanes, obstacle_planes) = self.generate_halfplanes(others, obstacles, tau);
 
         let mut new_vel: Option<Array1<f64>> = None;
@@ -108,6 +124,10 @@ impl Participant {
         obstacles: &[Obstacle],
         tau: f64,
     ) -> (Vec<Halfplane>, Vec<Halfplane>) {
+        debug!(
+            "Participant::generate_halfplanes({:?}, {:?}, {})",
+            participants, obstacles, tau
+        );
         let mut obstacle_planes = Vec::new();
         let mut halfplanes = Vec::new();
         // some cloning, since rust does not like multiple mutable borrows
@@ -170,6 +190,7 @@ impl Participant {
 
     /// Get adjustment velocities (u and n) with respect to another participant.
     fn get_adjustment_velocities(&self, b: &Participant, tau: f64) -> (Array1<f64>, Array1<f64>) {
+        debug!("Participant::get_adjustment_velocities({:?}, {})", b, tau);
         let x = &b.position - &self.position;
         let r = self.radius + self.confidence + b.radius + b.confidence;
         let v = &self.velocity - &b.velocity;
@@ -237,6 +258,7 @@ impl Participant {
 
     /// Calculate u and n for a static obstacle.
     fn obstacle_collision(&self, obstacle: &Obstacle, tau: f64) -> (Array1<f64>, Array1<f64>) {
+        debug!("Participant::obstacle_collision({:?}, {})", obstacle, tau);
         let r_vec = normalize(&self.velocity) * (self.radius + self.confidence + obstacle.radius);
         let start = &obstacle.start - &(&self.position + &r_vec);
         let end = &obstacle.end - &(&self.position - &r_vec);

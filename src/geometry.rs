@@ -1,3 +1,4 @@
+use log::debug;
 use ndarray::{arr1, Array1};
 
 use crate::{
@@ -11,6 +12,7 @@ pub fn out_of_disk(
     disk_r: f64,
     velocity: &Array1<f64>,
 ) -> (Array1<f64>, Array1<f64>) {
+    debug!("out_of_disk({:?}, {}, {:?})", disk_center, disk_r, velocity);
     let rel_vec = velocity - disk_center;
     let w_length = norm(&rel_vec);
     // rotate vector to outside of disk by 10 degrees
@@ -26,6 +28,10 @@ pub fn halfplane_intersection(
     current_velocity: &Array1<f64>,
     optimal_point: &Array1<f64>,
 ) -> Option<Array1<f64>> {
+    debug!(
+        "halfplane_intersection({:?}, {:?}, {:?})",
+        halfplanes_u, current_velocity, optimal_point
+    );
     let mut halfplanes = Vec::new();
     for plane in halfplanes_u {
         halfplanes.push(Halfplane {
@@ -62,6 +68,10 @@ fn intersect_halfplane_with_other_halfplanes(
     plane: &Halfplane,
     other_planes: &[Halfplane],
 ) -> (Option<f64>, Option<f64>) {
+    debug!(
+        "intersect_halfplane_with_other_halfplanes({:?}, {:?})",
+        plane, other_planes
+    );
     let mut left = -f64::INFINITY;
     let mut right = f64::INFINITY;
 
