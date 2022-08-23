@@ -24,17 +24,29 @@ pub struct Participant {
     pub velocity: Array1<f64>,
     pub radius: f64,
     pub confidence: f64,
-    pub vmax: f64,
-    pub target: Array1<f64>,
+    vmax: Option<f64>,
+    target: Option<Array1<f64>>,
     pub in_obstacle: bool,
 }
 
 impl Participant {
+    pub fn with_inner_state(mut self, vmax: f64, target: Array1<f64>) -> Self {
+        self.vmax = Some(vmax);
+        self.target = Some(target);
+        self
+    }
+
     pub fn update_position(&mut self, position: &Array1<f64>) {
         self.position = position.clone();
-        self.velocity = &self.target - &self.position;
-        if math::norm(&self.velocity) > self.vmax {
-            self.velocity = math::normalize(&self.velocity) * self.vmax
+
+        if let Some(target) = self.target.clone() {
+            self.velocity = target - &self.position;
+        }
+
+        if let Some(vmax) = self.vmax {
+            if math::norm(&self.velocity) > vmax {
+                self.velocity = math::normalize(&self.velocity) * vmax
+            }
         }
     }
 
@@ -77,9 +89,14 @@ impl Participant {
         }
         // shorten our new velocity, so we are not faster than our max velocity
         let mut vel = new_vel.unwrap();
-        if norm(&vel) > self.vmax {
-            vel = normalize(&vel) * self.vmax;
+        if let Some(vmax) = self.vmax {
+            if norm(&vel) > vmax {
+                vel = normalize(&vel) * vmax;
+            }
+        } else {
+            panic!("The 'main participant' of ORCA needs to have a max velocity!");
         }
+
         vel
     }
     /// Generate the halfplanes for other participants and static obstacles.
