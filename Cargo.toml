@@ -11,6 +11,9 @@ repository = "https://github.com/H1ghBre4k3r/orca-rs"
 log = "0.4.17"
 ndarray = "0.15.4"
 
+[dev-dependencies]
+env_logger = "0.9.1"
+
 [lib]
 name = "orca_rs"
 

@@ -63,13 +63,14 @@ pub fn halfplane_intersection(
     Some(new_point)
 }
 
+///  TODO: move this into impl of Halfplane
 /// Intersect one halfplane with a set of halfplanes.
 fn intersect_halfplane_with_other_halfplanes(
     plane: &Halfplane,
     other_planes: &[Halfplane],
 ) -> (Option<f64>, Option<f64>) {
     debug!(
-        "intersect_halfplane_with_other_halfplanes({:?}, {:?})",
+        "intersect_halfplane_with_other_halfplanes({:#?}, {:#?})",
         plane, other_planes
     );
     let mut left = -f64::INFINITY;
@@ -85,8 +86,9 @@ fn intersect_halfplane_with_other_halfplanes(
         let num = cross(&(&other_plane.u - &plane.u), &other_dir);
         let den = cross(&direction, &other_dir);
 
-        if den == 0.0 {
-            if num == 0.0 {
+        if den < f64::EPSILON {
+            if num < f64::EPSILON {
+                // lines are parallel
                 return (None, None);
             }
             continue;
@@ -100,6 +102,8 @@ fn intersect_halfplane_with_other_halfplanes(
         }
 
         if left > right {
+            // no intersection
+            // TODO: this somehow is buggy...
             return (None, None);
         }
     }
