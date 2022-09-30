@@ -22,7 +22,9 @@ const EPSILON: f64 = 0.0;
 #[derive(Debug, Clone)]
 pub struct Participant {
     pub position: Array1<f64>,
+    // TODO: introduce vpref
     pub velocity: Array1<f64>,
+    pref_velocity: Array1<f64>,
     pub radius: f64,
     pub confidence: f64,
     vmax: Option<f64>,
@@ -37,49 +39,60 @@ impl Participant {
             velocity,
             radius,
             confidence,
+            pref_velocity: arr1(&[0.0, 0.0]),
             vmax: None,
             target: None,
             in_obstacle: false,
         }
     }
 
+    /// Assign some inner state to this participant.
     pub fn with_inner_state(mut self, vmax: f64, target: Array1<f64>) -> Self {
         debug!("Participant::with_inner_state({}, {})", vmax, target);
         self.vmax = Some(vmax);
         debug!("self.vmax = {:?}", self.vmax);
         self.target = Some(target);
         debug!("self.target = {:?}", self.target);
+        self.update_preferred_velocity();
         self
     }
 
-    pub fn update_position(&mut self, position: &Array1<f64>) {
-        debug!("Participant::update_position({})", position);
-        self.position = position.clone();
-        debug!("self.position = {:?}", self.position);
-
+    fn update_preferred_velocity(&mut self) {
         if let Some(target) = self.target.clone() {
-            self.velocity = target - &self.position;
-            debug!("self.velocity = {:?}", self.velocity);
+            // FIXME: this should be vpref and not velocity
+            self.pref_velocity = target - &self.position;
+            debug!("self.pref_velocity = {:?}", self.pref_velocity);
         } else {
-            warn!("Updating the position of a participant without a target. Consider assigning property directly!")
+            warn!("Updating the position of a participant without a target.")
         }
-
         if let Some(vmax) = self.vmax {
-            if math::norm(&self.velocity) > vmax {
-                self.velocity = math::normalize(&self.velocity) * vmax;
-                debug!("self.velocity = {:?}", self.velocity);
+            if math::norm(&self.pref_velocity) > vmax {
+                self.pref_velocity = math::normalize(&self.pref_velocity) * vmax;
+                debug!("self.pref_velocity = {:?}", self.pref_velocity);
             }
         } else {
-            warn!("Updating the position of a participant without a maximum velocity. Consider assigning property directly!")
+            warn!("Updating the preferred velocity of a participant without a maximum velocity.")
         }
     }
 
+    /// Update the position, the velocity and the internal preferred velocity of this participant.
+    pub fn update_position(&mut self, position: &Array1<f64>) {
+        debug!("Participant::update_position({})", position);
+        self.velocity = position - &self.position;
+        debug!("self.velocity = {:?}", self.velocity);
+        self.position = position.clone();
+        debug!("self.position = {:?}", self.position);
+        self.update_preferred_velocity();
+    }
+
+    /// Update the information about this participant to be in an obstacle.
     pub fn in_obstacle(&mut self) {
         debug!("Participant::in_obstacle()");
         self.in_obstacle = true;
         debug!("self.in_obstacle = {}", self.in_obstacle);
     }
 
+    /// Check, if this participant is static, i.e., almost does not move.
     pub fn is_static(&self) -> bool {
         debug!("Participant::is_static()");
         norm(&self.velocity) <= EPSILON
@@ -104,7 +117,7 @@ impl Participant {
             let mut op = obstacle_planes.to_vec();
             hp.append(&mut op);
             // calculate new velocity
-            new_vel = halfplane_intersection(&hp, &self.velocity, &self.velocity);
+            new_vel = halfplane_intersection(&hp, &self.velocity, &self.pref_velocity);
             // adjust halfplanes (move them outward)
             let mut new_halfplanes: Vec<Halfplane> = Vec::new();
             for l in halfplanes {
